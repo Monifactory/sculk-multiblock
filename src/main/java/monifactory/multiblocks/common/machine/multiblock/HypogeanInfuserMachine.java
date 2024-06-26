@@ -47,8 +47,8 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine {
     protected TickableSubscription passiveSubs;
     protected TickableSubscription temperatureSubs;
 
-    public HypogeanInfuserMachine(IMachineBlockEntity holder, Object[] args) {
-        super(holder, args);
+    public HypogeanInfuserMachine(IMachineBlockEntity holder) {
+        super(holder);
         // TODO Auto-generated constructor stub
     }
 
