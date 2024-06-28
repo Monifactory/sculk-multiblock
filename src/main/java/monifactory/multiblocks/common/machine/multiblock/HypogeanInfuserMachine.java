@@ -53,9 +53,6 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
      * faster (or just be able to reach the recipe in the first place
      */
 
-    private double maxTemp;
-    private double minTemp;
-
     @Persisted
     private double temp;
 

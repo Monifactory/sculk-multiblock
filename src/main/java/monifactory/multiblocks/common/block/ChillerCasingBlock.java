@@ -96,7 +96,7 @@ public class ChillerCasingBlock extends ActiveBlock {
         }
 
         private static ResourceLocation prependRoot(String path) {
-            return MoniMultiblocks.id("block/casings/coils/chiller_casing_" + path);
+            return MoniMultiblocks.id("block/casings/coils/" + path);
         }
 
 
