@@ -10,8 +10,14 @@ import monifactory.multiblocks.common.block.ChillerCasingBlock.ChillerCasingType
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
 public class MMBlocks {
 
+
+    public static Map<IChillerCasingType, Supplier<ChillerCasingBlock>> CHILLER_CASINGS = new HashMap<>();
 
     public static BlockEntry<ChillerCasingBlock> MESOL_CASING = createChillerCasingBlock(
         ChillerCasingType.MESOL);
@@ -21,6 +27,8 @@ public class MMBlocks {
         ChillerCasingType.ABYSSAL);
     public static BlockEntry<ChillerCasingBlock> HADAL_CASING = createChillerCasingBlock(
         ChillerCasingType.HADAL);
+
+
 
     public static void init() {
 
@@ -39,6 +47,7 @@ public class MMBlocks {
             .item(RendererBlockItem::new).model(NonNullBiConsumer.noop())
             .build()
             .register();
+        CHILLER_CASINGS.put(coilType, coilBlock);
         return coilBlock;
     }
 }

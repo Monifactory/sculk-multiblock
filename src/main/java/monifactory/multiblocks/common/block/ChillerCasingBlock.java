@@ -32,10 +32,10 @@ public class ChillerCasingBlock extends ActiveBlock {
     }
 
     public enum ChillerCasingType implements StringRepresentable, IChillerCasingType {
-        MESOL("mesol", 1e-3, 1, 8, GTValues.LuV, null, prependRoot("mesol")),
-        BATHYAL("bathyal", 1e-6, 1, 8, GTValues.LuV, null, prependRoot("bathyal")),
-        ABYSSAL("abyssal", 1e-9, 1, 8, GTValues.LuV, null, prependRoot("abyssal")),
-        HADAL("hadal", 1e-12, 1, 8, GTValues.LuV, null, prependRoot("hadal"));
+        MESOL("mesol", 1e-3, 164, 2, GTValues.LuV, null, prependRoot("mesol")),
+        BATHYAL("bathyal", 1e-6, 256, 2, GTValues.LuV, null, prependRoot("bathyal")),
+        ABYSSAL("abyssal", 1e-9, 1024, 2, GTValues.LuV, null, prependRoot("abyssal")),
+        HADAL("hadal", 1e-12, 4096, 2, GTValues.LuV, null, prependRoot("hadal"));
 
         private final String name;
         private final double minTemp;

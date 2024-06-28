@@ -2,9 +2,11 @@ package monifactory.multiblocks;
 
 import com.gregtechceu.gtceu.api.addon.GTAddon;
 import com.gregtechceu.gtceu.api.addon.IGTAddon;
+import com.gregtechceu.gtceu.api.registry.GTRegistries;
 import com.gregtechceu.gtceu.api.registry.registrate.GTRegistrate;
 import monifactory.multiblocks.common.CommonProxy;
 import monifactory.multiblocks.common.data.MMRecipes;
+import monifactory.multiblocks.common.recipe.SculkTemperatureCondition;
 import net.minecraft.data.recipes.FinishedRecipe;
 
 import java.util.function.Consumer;
@@ -31,6 +33,12 @@ public class MMGTAddon implements IGTAddon {
     @Override
     public void addRecipes(Consumer<FinishedRecipe> reg) {
         MMRecipes.init(reg);
+    }
+
+    @Override
+    public void registerRecipeConditions() {
+        GTRegistries.RECIPE_CONDITIONS.register("sculk_temperature",
+            SculkTemperatureCondition.class);
     }
 
 }

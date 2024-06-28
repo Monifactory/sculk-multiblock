@@ -1,6 +1,5 @@
 package monifactory.multiblocks.common.data;
 
-import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeSerializer;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
@@ -14,8 +13,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 public class MMRecipeTypes {
     public final static GTRecipeType INFUSER_RECIPES = register("hypogean_infuser",
         GTRecipeTypes.MULTIBLOCK)
-        .setMaxIOSize(1, 1, 2, 1).setEUIO(IO.IN)
-        .prepareBuilder(recipeBuilder -> recipeBuilder.EUt(GTValues.VA[GTValues.MV]))
+        .setMaxIOSize(9, 1, 0, 0).setEUIO(IO.NONE)
         .setSound(GTSoundEntries.COOLING);
 
     public static GTRecipeType register(String name, String group, RecipeType<?>... proxyRecipes) {
