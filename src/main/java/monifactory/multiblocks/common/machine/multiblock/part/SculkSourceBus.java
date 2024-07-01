@@ -11,6 +11,8 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 
+import net.minecraft.world.item.Items;
+
 /**
  * Special bus to put sculk catalysts or whatever in to seed the Hypogean
  * Infuser with sculk
@@ -25,8 +27,8 @@ public class SculkSourceBus extends MultiblockPartMachine {
 
     public SculkSourceBus(IMachineBlockEntity holder) {
         super(holder);
-        this.inputInventoryProxy = new ItemHandlerProxyTrait(this, IO.IN);
         this.inputHandler = new NotifiableItemStackHandler(this, INVENTORY_SIZE, IO.IN);
+        this.inputInventoryProxy = new ItemHandlerProxyTrait(this, IO.IN);
         this.inputInventoryProxy.setProxy(inputHandler);
     }
 
@@ -35,7 +37,7 @@ public class SculkSourceBus extends MultiblockPartMachine {
     }
 
     public boolean getSculk() {
-        return inputInventoryProxy.isEmpty();
+        return inputHandler.extractItem(0, 1, false, false).getItem() == Items.SCULK_CATALYST;
     }
 
     @Override

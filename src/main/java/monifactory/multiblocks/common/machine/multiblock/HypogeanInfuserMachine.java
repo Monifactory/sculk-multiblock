@@ -69,6 +69,8 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
     @Nullable
     protected EnergyContainerList inputEnergyContainers;
 
+    protected SculkSourceBus sculkSource;
+
     protected TickableSubscription passiveSubs;
     protected TickableSubscription temperatureSubs;
 
@@ -78,6 +80,7 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
         // this.hasSculk = true;
     }
 
+    @Override
     public void notifyStatusChanged(RecipeLogic.Status oldStatus, RecipeLogic.Status newStatus) {
         if (oldStatus == RecipeLogic.Status.SUSPEND)
         {
@@ -131,7 +134,11 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
     }
 
     protected void updatePassiveSubscription() {
+        if (this.hasSculk) {
+            
+        } else {
 
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -164,8 +171,7 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
                 if (toDrain != null)
                 {
                     this.hasSculk = false;
-                    this.unsubscribe(passiveSubs);
-                    this.passiveSubs = null;
+                    this.updatePassiveSubscription();
                 }
             }
         }
@@ -253,6 +259,7 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
             {
                 sculkSource.addListener(this::updatePassiveSubscription);
                 this.hasSculk = sculkSource.getSculk();
+                this.sculkSource = sculkSource;
             }
             IO io = ioMap.getOrDefault(part.self().getPos().asLong(), IO.BOTH);
             if (io == IO.NONE || io == IO.OUT)
