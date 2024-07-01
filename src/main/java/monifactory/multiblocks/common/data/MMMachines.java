@@ -1,20 +1,24 @@
 package monifactory.multiblocks.common.data;
 
+import static com.gregtechceu.gtceu.api.GTValues.ZPM;
+
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.data.RotationState;
+import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.api.machine.MultiblockMachineDefinition;
-import com.gregtechceu.gtceu.api.machine.multiblock.PartAbility;
 import com.gregtechceu.gtceu.api.pattern.FactoryBlockPattern;
 import com.gregtechceu.gtceu.api.pattern.Predicates;
 import com.gregtechceu.gtceu.api.pattern.TraceabilityPredicate;
 import com.gregtechceu.gtceu.api.pattern.error.PatternStringError;
+import com.gregtechceu.gtceu.client.renderer.machine.OverlayTieredActiveMachineRenderer;
 import com.gregtechceu.gtceu.common.data.GTBlocks;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import monifactory.multiblocks.MoniMultiblocks;
 import monifactory.multiblocks.api.block.IChillerCasingType;
 import monifactory.multiblocks.common.CommonProxy;
 import monifactory.multiblocks.common.machine.multiblock.HypogeanInfuserMachine;
+import monifactory.multiblocks.common.machine.multiblock.part.SculkSourceBus;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Comparator;
@@ -39,17 +43,21 @@ public class MMMachines {
             .where('C',
                 Predicates.blocks(GTBlocks.CASING_ALUMINIUM_FROSTPROOF.get())
                     .or(Predicates.autoAbilities(definition.getRecipeTypes()))
-                    .or(Predicates
-                        .ability(PartAbility.INPUT_ENERGY,
-                            GTValues.tiersBetween(GTValues.LuV, GTValues.MAX))
-                        .setMinGlobalLimited(1))
-                    .or(Predicates
-                        .ability(PartAbility.IMPORT_FLUIDS)
-                        .setMinGlobalLimited(1)))
+                    .or(Predicates.abilities(MMPartAbilities.SCULK_SEED)))
             .where('A', Predicates.air()).build())
         .workableCasingRenderer(GTCEu.id("block/casings/solid/machine_casing_frost_proof"),
             MoniMultiblocks.id("block/multiblock/hypogean_infuser"), false)
         .register();
+
+    public static final MachineDefinition SCULK_SEEND_BUS = CommonProxy.REGISTRATE
+        .machine("sculk_seed_bus", SculkSourceBus::new)
+        .rotationState(RotationState.ALL)
+        .abilities(MMPartAbilities.SCULK_SEED)
+        .renderer(() -> new OverlayTieredActiveMachineRenderer(ZPM,
+            GTCEu.id("block/machine/part/object_holder"),
+            GTCEu.id("block/machine/part/object_holder_active")))
+        .register();
+
     public static void init() {
 
     }

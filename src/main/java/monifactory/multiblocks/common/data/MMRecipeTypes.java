@@ -13,8 +13,9 @@ import net.minecraft.world.item.crafting.RecipeType;
 public class MMRecipeTypes {
     public final static GTRecipeType INFUSER_RECIPES = register("hypogean_infuser",
         GTRecipeTypes.MULTIBLOCK)
-        .setMaxIOSize(9, 1, 0, 0).setEUIO(IO.NONE)
-        .setSound(GTSoundEntries.COOLING);
+        .setMaxIOSize(9, 1, 1, 0)
+        .setEUIO(IO.IN)
+        .setSound(GTSoundEntries.SUS_RECORD);
 
     public static GTRecipeType register(String name, String group, RecipeType<?>... proxyRecipes) {
         var recipeType = new GTRecipeType(MoniMultiblocks.id(name), group, proxyRecipes);

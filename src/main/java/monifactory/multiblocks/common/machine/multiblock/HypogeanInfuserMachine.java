@@ -28,6 +28,7 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import monifactory.multiblocks.api.block.IChillerCasingType;
 import monifactory.multiblocks.common.block.ChillerCasingBlock.ChillerCasingType;
+import monifactory.multiblocks.common.machine.multiblock.part.SculkSourceBus;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.Fluids;
@@ -54,7 +55,7 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
      */
 
     @Persisted
-    private double temp;
+    protected double temp;
 
     /**
      * If the infuser has sculk in it ready to run recipes.
@@ -73,8 +74,8 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
 
     public HypogeanInfuserMachine(IMachineBlockEntity holder) {
         super(holder);
-        // this.temp = ROOM_TEMP;
-        this.hasSculk = true;
+        this.temp = ROOM_TEMP;
+        // this.hasSculk = true;
     }
 
     public void notifyStatusChanged(RecipeLogic.Status oldStatus, RecipeLogic.Status newStatus) {
@@ -120,7 +121,7 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
             // return null;
             // } else
             // {
-                return recipe;
+            return recipe;
             // }
         } else
         {
@@ -129,39 +130,44 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
 
     }
 
+    protected void updatePassiveSubscription() {
+
+    }
+
     @SuppressWarnings("unchecked")
     protected void updatePassive() {
-        if (this.isFormed()) {
-        if ((getOffsetTimer() % casingType.getPassiveConsumptionRate()) == 0)
+        if (this.isFormed())
         {
-            List<IRecipeHandler<?>> inputTanks = new ArrayList<>();
-            if (getCapabilitiesProxy().contains(IO.IN, FluidRecipeCapability.CAP))
+            if ((getOffsetTimer() % casingType.getPassiveConsumptionRate()) == 0)
             {
-                inputTanks.addAll(Objects
-                    .requireNonNull(getCapabilitiesProxy().get(IO.IN, FluidRecipeCapability.CAP)));
+                List<IRecipeHandler<?>> inputTanks = new ArrayList<>();
+                if (getCapabilitiesProxy().contains(IO.IN, FluidRecipeCapability.CAP))
+                {
+                    inputTanks.addAll(Objects.requireNonNull(
+                        getCapabilitiesProxy().get(IO.IN, FluidRecipeCapability.CAP)));
+                }
+                if (getCapabilitiesProxy().contains(IO.BOTH, FluidRecipeCapability.CAP))
+                {
+                    inputTanks.addAll(Objects.requireNonNull(
+                        getCapabilitiesProxy().get(IO.BOTH, FluidRecipeCapability.CAP)));
+                }
+                List<FluidIngredient> toDrain = List
+                    .of(FluidIngredient.of(casingType.getPassiveConsumptionAmount(), Fluids.WATER));
+                for (IRecipeHandler<?> tank : inputTanks)
+                {
+                    toDrain = (List<FluidIngredient>) tank.handleRecipe(IO.IN, null, toDrain, null,
+                        false);
+                    if (toDrain == null)
+                        break;
+                }
+                // are we still looking for fluid to consume?
+                if (toDrain != null)
+                {
+                    this.hasSculk = false;
+                    this.unsubscribe(passiveSubs);
+                    this.passiveSubs = null;
+                }
             }
-            if (getCapabilitiesProxy().contains(IO.BOTH, FluidRecipeCapability.CAP))
-            {
-                inputTanks.addAll(Objects.requireNonNull(
-                    getCapabilitiesProxy().get(IO.BOTH, FluidRecipeCapability.CAP)));
-            }
-            List<FluidIngredient> toDrain = List
-                .of(FluidIngredient.of(casingType.getPassiveConsumptionAmount(), Fluids.WATER));
-            for (IRecipeHandler<?> tank : inputTanks)
-            {
-                toDrain = (List<FluidIngredient>) tank.handleRecipe(IO.IN, null, toDrain, null,
-                    false);
-                if (toDrain == null)
-                    break;
-            }
-            // are we still looking for fluid to consume?
-            if (toDrain != null)
-            {
-                this.hasSculk = false;
-                this.unsubscribe(passiveSubs);
-                this.passiveSubs = null;
-            }
-        }
         }
     }
 
@@ -173,7 +179,7 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
         if (!(RecipeLogic.Status.SUSPEND == status) && this.inputEnergyContainers != null)
         { // working so we can rty to chill
             if (this.inputEnergyContainers.getEnergyStored() > 0)
-            { //enabled and has energy, start cooling
+            { // enabled and has energy, start cooling
                 this.temperatureSubs = this.subscribeServerTick(this.temperatureSubs,
                     this::updateTemperature);
             } else
@@ -202,9 +208,13 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
         }
     }
 
+    protected void getSculkSeed() {
+
+    }
+
     protected void updateTemperature() {
         // System.out.println(this.temp);
-        if (this.isWorkingEnabled())
+        if (this.isWorkingEnabled() && this.isFormed())
         {
             if (this.inputEnergyContainers != null && this.inputEnergyContainers
                 .removeEnergy(this.casingType.getEnergyUsage()) >= this.casingType.getEnergyUsage())
@@ -239,6 +249,11 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
             Long2ObjectMaps::emptyMap);
         for (IMultiPart part : getParts())
         {
+            if (part instanceof SculkSourceBus sculkSource)
+            {
+                sculkSource.addListener(this::updatePassiveSubscription);
+                this.hasSculk = sculkSource.getSculk();
+            }
             IO io = ioMap.getOrDefault(part.self().getPos().asLong(), IO.BOTH);
             if (io == IO.NONE || io == IO.OUT)
                 continue;
@@ -264,9 +279,13 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
             this.casingType = casing;
         }
 
-
     }
 
+    @Override
+    public void onStructureInvalid() {
+        super.onStructureInvalid();
+        this.hasSculk = false;
+    }
 
     @Override
     public void onLoad() {
