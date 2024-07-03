@@ -27,3 +27,10 @@ setup because its complicated, not because it costs a million Monium.
      - If it runs out of experience at any time, it loses the sculk and will
        require another catalyst
    - Sculk is also lost when the multiblock is broken
+ - Uncertain mechanics
+   - Should it be able to overclock? do parallel?
+   - Should it even cost anything to do recipes?
+     - Maybe just have it increase the passive xp cost while cold, but run for free when
+       its cold enough.
+     - Would also give an excuse to make the passive cost pretty high to make it
+       more inticing to turn it off when not in use
