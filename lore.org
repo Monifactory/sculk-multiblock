@@ -7,8 +7,8 @@ happen in real life, if we had the technology to do it.
 From this, it shows that most machines in Monifactory are usually physically
 plausible, just that it requires some magical material to break the laws of
 physics initially, but from there, it follows as expected. For example, the
-Microverse Projecter probably isn't possible, but it's only really the
-microverse part that's impossible. If we could make a minuture universe, it'd be
+Microverse Projector probably isn't possible, but it's only really the
+microverse part that's impossible. If we could make a miniature universe, it'd be
 perfectly possible to build a miner to mine that microverse for materials.
 
 ** Sculk

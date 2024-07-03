@@ -1,6 +1,6 @@
 * Machines
 Remember that these machines are for the end-game of Monifactory. While some of
-these behavoirs might be a little unfair, it's intended because the end-game
+these behaviors might be a little unfair, it's intended because the end-game
 machines should be a challenge to setup. These machines should be difficult to
 setup because its complicated, not because it costs a million Monium.
 
@@ -20,9 +20,9 @@ setup because its complicated, not because it costs a million Monium.
      - This is an easy fix to multiblocks taking a few ticks to actually form on
        world load
      - Also is nice to people who need to edit the multiblock
-       - And makes me feel better about making it take longer to cooldown
+       - And makes me feel better about making it take longer to cool down
  - Has internal sculk that is required to do recipes
-   - This sculk is intially gained by spending some expensive item, like a Sculk Catalyst
+   - This sculk is initially gained by spending some expensive item, like a Sculk Catalyst
    - The sculk can be maintained by constantly feeding it with liquid experience
      - If it runs out of experience at any time, it loses the sculk and will
        require another catalyst
