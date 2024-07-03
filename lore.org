@@ -1,0 +1,46 @@
+* General Lore
+The world Monifactory takes place in is *generally* a world without magic. While
+there are magical materials that can break the laws of physics, there aren't any
+overtly magical things. Almost everything is something that could plausibly
+happen in real life, if we had the technology to do it.
+
+From this, it shows that most machines in Monifactory are usually physically
+plausible, just that it requires some magical material to break the laws of
+physics initially, but from there, it follows as expected. For example, the
+Microverse Projecter probably isn't possible, but it's only really the
+microverse part that's impossible. If we could make a minuture universe, it'd be
+perfectly possible to build a miner to mine that microverse for materials.
+
+** Sculk
+Sculk is some sort of fungal-like thing that can spread (and even convert) stuff
+by feeding on experience. Additionally sculk thrives in the cold and because
+sculk is a magical fungus, it thrives at cold temperatures. It's favorite
+temperature is absolute zero because why not. It's some sort of magical fungus
+that loves darkness and caves, so it must love the cold.
+
+* Machines
+** Hypogean Infuser
+The Hypogean Infuser is a machine that encourages sculk to grow and transmute
+items together. It does this by chilling the sculk down, the closer to absolute
+zero the better. Then it feeds the sculk with large amounts of experience to
+force it to grow on things it normally doesn't. The more experience its fed and
+the colder it is, the more varied the items it can grow on.
+
+One possible explanation for sculk requiring such extreme conditions to grow on
+somethings could be that sculking something multiple times becomes harder and
+harder because the sculk already grew everywhere it could at the warmer
+temperature. For recipes that don't involve pre-sculked stuff ¯\_(ツ)_/¯,
+something something bad substrate for growing.
+
+In order for the Hypogean Infuser to work it must first chill the growing
+chamber down, this takes time and requires a constant amount of power. The
+amount is dependent on the final temperature it's trying to reach. If the
+Infuser runs out of power it'll instead warm up back to room temperature.
+
+The Infuser also requires a source of sculk to actually grow with. Normally this
+requires some seed item like a Sculk Catalyst or whatever's expensive in Moni,
+but the Infuser can keep its initial sculk alive by feeding it with
+experience. The amount of xp the sculk requires is dependent on the temperature,
+colder requires more because the sculk is more active. If the Infuser runs out
+of xp, the sculk will die, and it'll require another seed item.
+

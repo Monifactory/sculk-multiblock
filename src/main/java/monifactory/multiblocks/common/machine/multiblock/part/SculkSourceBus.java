@@ -4,13 +4,12 @@ import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.multiblock.part.MultiblockPartMachine;
-import com.gregtechceu.gtceu.api.machine.trait.ItemHandlerProxyTrait;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
-
+import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 import net.minecraft.world.item.Items;
 
 /**
@@ -18,18 +17,19 @@ import net.minecraft.world.item.Items;
  * Infuser with sculk
  */
 public class SculkSourceBus extends MultiblockPartMachine {
-
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
+        SculkSourceBus.class, MultiblockPartMachine.MANAGED_FIELD_HOLDER);
     private static final int INVENTORY_SIZE = 1;
 
-    private ItemHandlerProxyTrait inputInventoryProxy;
+    //private ItemHandlerProxyTrait inputInventoryProxy;
     @Persisted
     private NotifiableItemStackHandler inputHandler;
 
     public SculkSourceBus(IMachineBlockEntity holder) {
         super(holder);
-        this.inputHandler = new NotifiableItemStackHandler(this, INVENTORY_SIZE, IO.IN);
-        this.inputInventoryProxy = new ItemHandlerProxyTrait(this, IO.IN);
-        this.inputInventoryProxy.setProxy(inputHandler);
+        this.inputHandler = new NotifiableItemStackHandler(this, INVENTORY_SIZE, IO.BOTH);
+        //this.inputInventoryProxy = new ItemHandlerProxyTrait(this, IO.IN);
+        //this.inputInventoryProxy.setProxy(inputHandler);
     }
 
     public void addListener(Runnable runnable) {
@@ -51,7 +51,7 @@ public class SculkSourceBus extends MultiblockPartMachine {
         {
             for (int x = 0; x < rowSize; x++)
             {
-                container.addWidget(new SlotWidget(inputInventoryProxy, index++, 4 + x * 18,
+                container.addWidget(new SlotWidget(inputHandler, index++, 4 + x * 18,
                     4 + y * 18, true, true).setBackgroundTexture(GuiTextures.SLOT));
                 // .setIngredientIO(IngredientIO.INPUT));
             }
@@ -61,5 +61,10 @@ public class SculkSourceBus extends MultiblockPartMachine {
         group.addWidget(container);
 
         return group;
+    }
+
+    @Override
+    public ManagedFieldHolder getFieldHolder() {
+        return MANAGED_FIELD_HOLDER;
     }
 }

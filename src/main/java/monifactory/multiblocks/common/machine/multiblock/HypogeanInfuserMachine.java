@@ -5,32 +5,25 @@ import com.gregtechceu.gtceu.api.capability.recipe.EURecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
-import com.gregtechceu.gtceu.api.gui.GuiTextures;
-import com.gregtechceu.gtceu.api.gui.fancy.FancyMachineUIWidget;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.feature.IFancyUIMachine;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IDisplayUIMachine;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
-import com.gregtechceu.gtceu.api.machine.multiblock.WorkableMultiblockMachine;
+import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.misc.EnergyContainerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
-import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
-import com.lowdragmc.lowdraglib.gui.widget.ComponentPanelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.Widget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
+import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import monifactory.multiblocks.api.block.IChillerCasingType;
 import monifactory.multiblocks.common.block.ChillerCasingBlock.ChillerCasingType;
 import monifactory.multiblocks.common.machine.multiblock.part.SculkSourceBus;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,8 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class HypogeanInfuserMachine extends WorkableMultiblockMachine
+public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     implements IFancyUIMachine, IDisplayUIMachine {
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
+        HypogeanInfuserMachine.class, WorkableElectricMultiblockMachine.MANAGED_FIELD_HOLDER);
 
     public static final double ROOM_TEMP = 293.15;
 
@@ -82,6 +77,7 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
 
     @Override
     public void notifyStatusChanged(RecipeLogic.Status oldStatus, RecipeLogic.Status newStatus) {
+        super.notifyStatusChanged(oldStatus, newStatus);
         if (oldStatus == RecipeLogic.Status.SUSPEND)
         {
             this.updateTemperatureSubscription(newStatus);
@@ -89,29 +85,18 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
     }
 
     @Override
-    public ModularUI createUI(Player entityPlayer) {
-        return new ModularUI(198, 208, this, entityPlayer)
-            .widget(new FancyMachineUIWidget(this, 198, 208));
-    }
-
-    @Override
     public void addDisplayText(List<Component> textList) {
-        textList.add(Component.literal(Double.toString(this.temp) + 'K'));
-        textList.add(Component.literal("Has Sculk: " + this.hasSculk));
-        IDisplayUIMachine.super.addDisplayText(textList);
-    }
+        super.addDisplayText(textList);
+        textList.add(Component.literal(getMetricUnit(this.temp, 'K')));
+        if (this.hasSculk)
+        {
+            textList.add(Component.translatable("moni_multiblocks.multiblock.hasSculk")
+                .withStyle(ChatFormatting.GREEN));
+        } else {
+            textList.add(Component.translatable("moni_multiblocks.multiblock.hasNoSculk")
+                .withStyle(ChatFormatting.RED));
+        }
 
-    @Override
-    public Widget createUIWidget() {
-        var group = new WidgetGroup(0, 0, 182 + 8, 117 + 8);
-        group.addWidget(new DraggableScrollableWidgetGroup(4, 4, 182, 117)
-            .setBackground(getScreenTexture())
-            .addWidget(new LabelWidget(4, 5, self().getBlockState().getBlock().getDescriptionId()))
-            .addWidget(new ComponentPanelWidget(4, 17, this::addDisplayText)
-                .textSupplier(this.getLevel().isClientSide ? null : this::addDisplayText)
-                .setMaxWidthLimit(150).clickHandler(this::handleDisplayClick)));
-        group.setBackground(GuiTextures.BACKGROUND_INVERSE);
-        return group;
     }
 
     public static GTRecipe recipeModifer(MetaMachine machine, @NotNull GTRecipe recipe) {
@@ -134,10 +119,16 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
     }
 
     protected void updatePassiveSubscription() {
-        if (this.hasSculk) {
-            
+        if (!this.hasSculk) {
+            if (this.sculkSource != null && this.sculkSource.getSculk()) {
+                this.hasSculk = true;
+                this.passiveSubs = subscribeServerTick(passiveSubs, this::updatePassive);
+            } else {
+                unsubscribe(passiveSubs);
+                this.passiveSubs = null;
+            }
         } else {
-
+            
         }
     }
 
@@ -214,10 +205,6 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
         }
     }
 
-    protected void getSculkSeed() {
-
-    }
-
     protected void updateTemperature() {
         // System.out.println(this.temp);
         if (this.isWorkingEnabled() && this.isFormed())
@@ -257,25 +244,24 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
         {
             if (part instanceof SculkSourceBus sculkSource)
             {
+                // TODO make this be like the chiller casing with MatchContext or whatever
                 sculkSource.addListener(this::updatePassiveSubscription);
-                this.hasSculk = sculkSource.getSculk();
                 this.sculkSource = sculkSource;
-            }
-            IO io = ioMap.getOrDefault(part.self().getPos().asLong(), IO.BOTH);
-            if (io == IO.NONE || io == IO.OUT)
-                continue;
-            for (var handler : part.getRecipeHandlers())
-            {
-                // If IO not compatible
-                if (io != IO.BOTH && handler.getHandlerIO() != IO.BOTH
-                    && io != handler.getHandlerIO())
+            } else {
+                IO io = ioMap.getOrDefault(part.self().getPos().asLong(), IO.BOTH);
+                if (io == IO.NONE || io == IO.OUT)
                     continue;
-                if (handler.getCapability() == EURecipeCapability.CAP
-                    && handler instanceof IEnergyContainer container)
-                {
-                    energyContainers.add(container);
-                    traitSubscriptions
-                        .add(handler.addChangedListener(this::updateTemperatureSubscription));
+                for (var handler : part.getRecipeHandlers()) {
+                    // If IO not compatible
+                    if (io != IO.BOTH && handler.getHandlerIO() != IO.BOTH
+                            && io != handler.getHandlerIO())
+                        continue;
+                    if (handler.getCapability() == EURecipeCapability.CAP
+                            && handler instanceof IEnergyContainer container) {
+                        energyContainers.add(container);
+                        traitSubscriptions
+                                .add(handler.addChangedListener(this::updateTemperatureSubscription));
+                    }
                 }
             }
         }
@@ -285,6 +271,8 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
         {
             this.casingType = casing;
         }
+        this.updateTemperatureSubscription();
+        this.updatePassiveSubscription();
 
     }
 
@@ -292,27 +280,50 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
     public void onStructureInvalid() {
         super.onStructureInvalid();
         this.hasSculk = false;
+        this.unsubscribe(passiveSubs);
+        passiveSubs = null;
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
         this.updateTemperatureSubscription();
-        this.passiveSubs = this.subscribeServerTick(this::updatePassive);
+        this.updatePassiveSubscription();
+    }
+
+    /**
+     * a prefix to be applied to a metric unit, index isthe order of magnitude of
+     * the number. In other words the base-10 logarithm divided by 3 minus 1 because
+     * 0 is no prefix
+     */
+    public static final char[] LARGE_METRIC_PREFIXES = new char[] { 'k', 'M', 'G', 'T', 'P', 'E',
+        'Z', 'Y', 'R', 'Q' };
+    /**
+     * a prefix to be applied to a metric unit, index is the absolute value of the
+     * order of magnitude of the number. In other words the absolute value of the
+     * base-10 logarithm divided by 3 minus 1 because 0 is no prefix
+     */
+    public static final char[] SMALL_METRIC_PREFIXES = new char[] { 'm', 'μ', 'n', 'p', 'f', 'a',
+        'z', 'y', 'r', 'q' };
+
+    public static String getMetricUnit(double number, char unit) {
+        double OoM = Math.log10(Math.abs(number));
+        char[] prefix = OoM >= 0 ? LARGE_METRIC_PREFIXES : SMALL_METRIC_PREFIXES;
+        int index = (Math.abs((int) Math.floor(OoM / 3))) - 1;
+        if (index == -1)
+        {
+            return String.valueOf(Math.round(number * 10000d) / 10000d) + ' ' + unit;
+        } else
+        {
+            double shifted = number / Math.pow(10, Math.floor(OoM / 3) * 3);
+            return String.valueOf(Math.round(shifted * 100d) / 100d) + ' '
+                + prefix[index]
+                + unit;
+        }
     }
 
     public IChillerCasingType getCasingType() {
         return this.casingType;
-    }
-
-    /**
-     * Slightly randomize value to make it look more realistic
-     * 
-     * @param value
-     * @return value randomized by a guassian
-     */
-    private double fuzz(double value) {
-        return value - value * this.getLevel().getRandom().nextGaussian();
     }
 
     public double getTemp() {
@@ -321,5 +332,10 @@ public class HypogeanInfuserMachine extends WorkableMultiblockMachine
 
     public boolean getSculk() {
         return this.hasSculk;
+    }
+
+    @Override
+    public ManagedFieldHolder getFieldHolder() {
+        return MANAGED_FIELD_HOLDER;
     }
 }

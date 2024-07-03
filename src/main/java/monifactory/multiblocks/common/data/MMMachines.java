@@ -11,8 +11,10 @@ import com.gregtechceu.gtceu.api.pattern.FactoryBlockPattern;
 import com.gregtechceu.gtceu.api.pattern.Predicates;
 import com.gregtechceu.gtceu.api.pattern.TraceabilityPredicate;
 import com.gregtechceu.gtceu.api.pattern.error.PatternStringError;
+import com.gregtechceu.gtceu.api.recipe.OverclockingLogic;
 import com.gregtechceu.gtceu.client.renderer.machine.OverlayTieredActiveMachineRenderer;
 import com.gregtechceu.gtceu.common.data.GTBlocks;
+import com.gregtechceu.gtceu.common.data.GTRecipeModifiers;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import monifactory.multiblocks.MoniMultiblocks;
 import monifactory.multiblocks.api.block.IChillerCasingType;
@@ -30,7 +32,8 @@ public class MMMachines {
         .rotationState(RotationState.ALL)
         .tier(GTValues.LuV)
         .recipeType(MMRecipeTypes.INFUSER_RECIPES)
-        .recipeModifier(HypogeanInfuserMachine::recipeModifer)
+        .recipeModifier(
+            GTRecipeModifiers.ELECTRIC_OVERCLOCK.apply(OverclockingLogic.NON_PERFECT_OVERCLOCK))
         .appearanceBlock(GTBlocks.CASING_ALUMINIUM_FROSTPROOF)
         .pattern(definition -> FactoryBlockPattern.start()
             .aisle("CCCCC", "     ", "     ", "     ", "CCCCC")

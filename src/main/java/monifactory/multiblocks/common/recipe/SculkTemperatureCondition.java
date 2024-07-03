@@ -32,10 +32,8 @@ public class SculkTemperatureCondition extends RecipeCondition {
 
     @Override
     public boolean test(@NotNull GTRecipe recipe, @NotNull RecipeLogic recipeLogic) {
-        System.out.println("testing condition");
         if (recipeLogic.getMachine() instanceof HypogeanInfuserMachine machine)
         {
-            System.out.println(machine.getTemp());
             return machine.getSculk() && machine.getTemp() < maxTemp;
         } else
         {
