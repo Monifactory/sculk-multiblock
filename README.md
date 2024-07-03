@@ -17,3 +17,7 @@ parallel version of it to not have that sculk incorporated somehow.
 `lore.org` contains the relevant lore explaining how these machines are supposed
 to be working, as well as, general lore about the world (like how sculk really
 loves the cold)
+
+`mechanics.org` contains information on how machines are supposed to work
+mechanically. Helps to define what exactly is intended behavoir and what's a
+bug (also lets people easily see how its supposed to work).

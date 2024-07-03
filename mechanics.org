@@ -1,0 +1,29 @@
+* Machines
+Remember that these machines are for the end-game of Monifactory. While some of
+these behavoirs might be a little unfair, it's intended because the end-game
+machines should be a challenge to setup. These machines should be difficult to
+setup because its complicated, not because it costs a million Monium.
+
+** Hypogrean Infuser
+ - Has an internal temperature that can cool down and heat up
+   - Temperature vaguely obeys Newton's Law of Cooling
+     - Means the temperature quickly changes when moving away from the extremes,
+       but is quite slow to actually reach a extreme
+     - Prevents any cheesing of the passive cost by quickly disabling the
+       Infuser because one tick of warming when it's cold is worth many ticks of cooling
+   - Infuser requires a passive draw of energy while cooling
+     - The amount is dependent on the Cryogenic Casing tier
+     - The passive draw (and the cooling) can be disabled by disabling the
+       machine
+       - Also disables recipes, too bad!
+   - While the multiblock is broken, the infuser doesn't change temperature
+     - This is an easy fix to multiblocks taking a few ticks to actually form on
+       world load
+     - Also is nice to people who need to edit the multiblock
+       - And makes me feel better about making it take longer to cooldown
+ - Has internal sculk that is required to do recipes
+   - This sculk is intially gained by spending some expensive item, like a Sculk Catalyst
+   - The sculk can be maintained by constantly feeding it with liquid experience
+     - If it runs out of experience at any time, it loses the sculk and will
+       require another catalyst
+   - Sculk is also lost when the multiblock is broken
