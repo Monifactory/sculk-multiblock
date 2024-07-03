@@ -17,7 +17,7 @@ public class SculkHatchPartMachine extends FluidHatchPartMachine {
 	
 	 @Override
 	    protected NotifiableFluidTank createTank(long initialCapacity, int slots, Object... args) {
-	        return super.createTank(initialCapacity, slots).setFilter(fluidStack -> fluidStack.getFluid().equals(GTMaterials.Water.getFluidTag()));
+	        return super.createTank(initialCapacity, slots).setFilter(fluidStack -> fluidStack.getFluid().equals(GTMaterials.Water.getFluid()));
 	    }
 
 }

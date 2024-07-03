@@ -34,9 +34,9 @@ import java.util.Map;
 import java.util.Objects;
 
 public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
-    implements IFancyUIMachine, IDisplayUIMachine {
+        implements IFancyUIMachine, IDisplayUIMachine {
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
-        HypogeanInfuserMachine.class, WorkableElectricMultiblockMachine.MANAGED_FIELD_HOLDER);
+            HypogeanInfuserMachine.class, WorkableElectricMultiblockMachine.MANAGED_FIELD_HOLDER);
 
     public static final double ROOM_TEMP = 293.15;
 
@@ -72,14 +72,13 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     public HypogeanInfuserMachine(IMachineBlockEntity holder) {
         super(holder);
         this.temp = ROOM_TEMP;
-        // this.hasSculk = true;
+        this.hasSculk = false;
     }
 
     @Override
     public void notifyStatusChanged(RecipeLogic.Status oldStatus, RecipeLogic.Status newStatus) {
         super.notifyStatusChanged(oldStatus, newStatus);
-        if (oldStatus == RecipeLogic.Status.SUSPEND)
-        {
+        if (oldStatus == RecipeLogic.Status.SUSPEND) {
             this.updateTemperatureSubscription(newStatus);
         }
     }
@@ -88,32 +87,12 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     public void addDisplayText(List<Component> textList) {
         super.addDisplayText(textList);
         textList.add(Component.literal(getMetricUnit(this.temp, 'K')));
-        if (this.hasSculk)
-        {
+        if (this.hasSculk) {
             textList.add(Component.translatable("moni_multiblocks.multiblock.hasSculk")
-                .withStyle(ChatFormatting.GREEN));
+                    .withStyle(ChatFormatting.GREEN));
         } else {
             textList.add(Component.translatable("moni_multiblocks.multiblock.hasNoSculk")
-                .withStyle(ChatFormatting.RED));
-        }
-
-    }
-
-    public static GTRecipe recipeModifer(MetaMachine machine, @NotNull GTRecipe recipe) {
-
-        if (machine instanceof HypogeanInfuserMachine infuserMachine)
-        {
-            // if (!recipe.condition <
-            // infuserMachine.getCasingType().getCasingTemperature())
-            // {
-            // return null;
-            // } else
-            // {
-            return recipe;
-            // }
-        } else
-        {
-            return null;
+                    .withStyle(ChatFormatting.RED));
         }
 
     }
@@ -128,39 +107,34 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
                 this.passiveSubs = null;
             }
         } else {
-            
+            unsubscribe(passiveSubs);
+            this.passiveSubs = null;
         }
     }
 
     @SuppressWarnings("unchecked")
     protected void updatePassive() {
-        if (this.isFormed())
-        {
-            if ((getOffsetTimer() % casingType.getPassiveConsumptionRate()) == 0)
-            {
+        if (this.isFormed()) {
+            if ((getOffsetTimer() % casingType.getPassiveConsumptionRate()) == 0) {
                 List<IRecipeHandler<?>> inputTanks = new ArrayList<>();
-                if (getCapabilitiesProxy().contains(IO.IN, FluidRecipeCapability.CAP))
-                {
+                if (getCapabilitiesProxy().contains(IO.IN, FluidRecipeCapability.CAP)) {
                     inputTanks.addAll(Objects.requireNonNull(
-                        getCapabilitiesProxy().get(IO.IN, FluidRecipeCapability.CAP)));
+                            getCapabilitiesProxy().get(IO.IN, FluidRecipeCapability.CAP)));
                 }
-                if (getCapabilitiesProxy().contains(IO.BOTH, FluidRecipeCapability.CAP))
-                {
+                if (getCapabilitiesProxy().contains(IO.BOTH, FluidRecipeCapability.CAP)) {
                     inputTanks.addAll(Objects.requireNonNull(
-                        getCapabilitiesProxy().get(IO.BOTH, FluidRecipeCapability.CAP)));
+                            getCapabilitiesProxy().get(IO.BOTH, FluidRecipeCapability.CAP)));
                 }
                 List<FluidIngredient> toDrain = List
-                    .of(FluidIngredient.of(casingType.getPassiveConsumptionAmount(), Fluids.WATER));
-                for (IRecipeHandler<?> tank : inputTanks)
-                {
+                        .of(FluidIngredient.of(casingType.getPassiveConsumptionAmount(), Fluids.WATER));
+                for (IRecipeHandler<?> tank : inputTanks) {
                     toDrain = (List<FluidIngredient>) tank.handleRecipe(IO.IN, null, toDrain, null,
-                        false);
+                            false);
                     if (toDrain == null)
                         break;
                 }
                 // are we still looking for fluid to consume?
-                if (toDrain != null)
-                {
+                if (toDrain != null) {
                     this.hasSculk = false;
                     this.updatePassiveSubscription();
                 }
@@ -173,42 +147,36 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     }
 
     protected void updateTemperatureSubscription(RecipeLogic.Status status) {
-        if (!(RecipeLogic.Status.SUSPEND == status) && this.inputEnergyContainers != null)
-        { // working so we can rty to chill
-            if (this.inputEnergyContainers.getEnergyStored() > 0)
-            { // enabled and has energy, start cooling
+        if (!(RecipeLogic.Status.SUSPEND == status) && this.inputEnergyContainers != null) { // working so we can rty to
+                                                                                             // chill
+            if (this.inputEnergyContainers.getEnergyStored() > 0) { // enabled and has energy, start cooling
                 this.temperatureSubs = this.subscribeServerTick(this.temperatureSubs,
-                    this::updateTemperature);
-            } else
-            {// no energy, only go if still cold
-                if (temp < ROOM_TEMP)
-                {// no energy, but still heating up
-                    this.temperatureSubs = this.subscribeServerTick(this.temperatureSubs,
                         this::updateTemperature);
-                } else
-                {// no energy, no cold, do nothing
+            } else {// no energy, only go if still cold
+                if (temp < ROOM_TEMP) {// no energy, but still heating up
+                    this.temperatureSubs = this.subscribeServerTick(this.temperatureSubs,
+                            this::updateTemperature);
+                } else {// no energy, no cold, do nothing
                     this.unsubscribe(this.temperatureSubs);
                     this.temperatureSubs = null;
                 }
             }
-        } else
-        {// not working can only warm up
-            if (temp >= ROOM_TEMP)
-            {// at room temperature, nothing to do
+        } else {// not working can only warm up
+            if (temp >= ROOM_TEMP) {// at room temperature, nothing to do
                 this.unsubscribe(this.temperatureSubs);
                 this.temperatureSubs = null;
-            } else
-            {// still cold, continue warming
+            } else {// still cold, continue warming
                 this.temperatureSubs = this.subscribeServerTick(this.temperatureSubs,
-                    this::updateTemperature);
+                        this::updateTemperature);
             }
         }
     }
 
     protected void updateTemperature() {
         // System.out.println(this.temp);
-        if (this.isWorkingEnabled() && this.isFormed())
+        if (this.isWorkingEnabled())
         {
+            if (this.isFormed()) {
             if (this.inputEnergyContainers != null && this.inputEnergyContainers
                 .removeEnergy(this.casingType.getEnergyUsage()) >= this.casingType.getEnergyUsage())
             {
@@ -216,6 +184,11 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
                     this.recipeLogic.updateTickSubscription();
                 this.temp = equalizeTemp(this.temp, this.casingType.getCasingTemperature() * 0.99);
 
+                return;
+            }
+            } else {
+                // we're not formed yet, don't warm up to be nice
+                // if someone abuses this, I'll be very mean while fixing this "exploit"
                 return;
             }
         }
@@ -230,7 +203,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
 
     // loosely based off Newton's law of cooling
     protected static double equalizeTemp(double temp, double targetTemp) {
-        return temp - .01 * 1 * (temp - targetTemp);
+        return temp - ((1d / 20d) * .01d * (temp - targetTemp));
     }
 
     @Override
@@ -239,11 +212,9 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         // capture all energy containers
         List<IEnergyContainer> energyContainers = new ArrayList<>();
         Map<Long, IO> ioMap = getMultiblockState().getMatchContext().getOrCreate("ioMap",
-            Long2ObjectMaps::emptyMap);
-        for (IMultiPart part : getParts())
-        {
-            if (part instanceof SculkSourceBus sculkSource)
-            {
+                Long2ObjectMaps::emptyMap);
+        for (IMultiPart part : getParts()) {
+            if (part instanceof SculkSourceBus sculkSource) {
                 // TODO make this be like the chiller casing with MatchContext or whatever
                 sculkSource.addListener(this::updatePassiveSubscription);
                 this.sculkSource = sculkSource;
@@ -267,8 +238,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         }
         this.inputEnergyContainers = new EnergyContainerList(energyContainers);
         Object obj = this.getMultiblockState().getMatchContext().get("ChillerCasing");
-        if (obj instanceof IChillerCasingType casing)
-        {
+        if (obj instanceof IChillerCasingType casing) {
             this.casingType = casing;
         }
         this.updateTemperatureSubscription();
@@ -297,28 +267,26 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
      * 0 is no prefix
      */
     public static final char[] LARGE_METRIC_PREFIXES = new char[] { 'k', 'M', 'G', 'T', 'P', 'E',
-        'Z', 'Y', 'R', 'Q' };
+            'Z', 'Y', 'R', 'Q' };
     /**
      * a prefix to be applied to a metric unit, index is the absolute value of the
      * order of magnitude of the number. In other words the absolute value of the
      * base-10 logarithm divided by 3 minus 1 because 0 is no prefix
      */
     public static final char[] SMALL_METRIC_PREFIXES = new char[] { 'm', 'μ', 'n', 'p', 'f', 'a',
-        'z', 'y', 'r', 'q' };
+            'z', 'y', 'r', 'q' };
 
     public static String getMetricUnit(double number, char unit) {
         double OoM = Math.log10(Math.abs(number));
         char[] prefix = OoM >= 0 ? LARGE_METRIC_PREFIXES : SMALL_METRIC_PREFIXES;
         int index = (Math.abs((int) Math.floor(OoM / 3))) - 1;
-        if (index == -1)
-        {
+        if (index == -1) {
             return String.valueOf(Math.round(number * 10000d) / 10000d) + ' ' + unit;
-        } else
-        {
+        } else {
             double shifted = number / Math.pow(10, Math.floor(OoM / 3) * 3);
             return String.valueOf(Math.round(shifted * 100d) / 100d) + ' '
-                + prefix[index]
-                + unit;
+                    + prefix[index]
+                    + unit;
         }
     }
 
