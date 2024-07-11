@@ -1,0 +1,1 @@
+com.kjs.integration.com.monifactory.multiblocks.MMKubeJSPlugin
