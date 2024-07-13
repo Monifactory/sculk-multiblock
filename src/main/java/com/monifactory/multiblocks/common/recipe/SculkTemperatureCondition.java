@@ -27,7 +27,7 @@ public class SculkTemperatureCondition extends RecipeCondition {
 
     @Override
     public Component getTooltips() {
-        return Component.literal("temp: " + maxTemp + 'K');
+        return Component.literal("Temperature: " + maxTemp + 'K');
     }
 
     @Override

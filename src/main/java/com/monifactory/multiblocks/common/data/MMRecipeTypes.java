@@ -15,7 +15,7 @@ public class MMRecipeTypes {
         GTRecipeTypes.MULTIBLOCK)
         .setMaxIOSize(9, 1, 1, 0)
         .setEUIO(IO.IN)
-        .setSound(GTSoundEntries.SUS_RECORD);
+        .setSound(GTSoundEntries.COOLING);
 
     public static GTRecipeType register(String name, String group, RecipeType<?>... proxyRecipes) {
         var recipeType = new GTRecipeType(MoniMultiblocks.id(name), group, proxyRecipes);
