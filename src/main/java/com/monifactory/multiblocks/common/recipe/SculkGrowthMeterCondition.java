@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public class SculkGrowthMeterCondition extends RecipeCondition {
     public static final SculkGrowthMeterCondition INSTANCE = new SculkGrowthMeterCondition();
 
-    private int minGrowthMeter;
+    private int minGrowthMeter = 0;
 
     public SculkGrowthMeterCondition(int minGrowthMeter) {
         this.minGrowthMeter = minGrowthMeter;
@@ -29,7 +29,7 @@ public class SculkGrowthMeterCondition extends RecipeCondition {
 
     @Override
     public Component getTooltips() {
-        return Component.literal(LocalizationUtils.format("Required Growth Meter: %d%%", minGrowthMeter));
+        return Component.literal("Required Growth Meter: %d".formatted(minGrowthMeter));
     }
 
     @Override

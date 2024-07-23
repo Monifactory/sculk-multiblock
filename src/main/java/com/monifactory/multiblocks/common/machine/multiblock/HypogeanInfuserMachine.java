@@ -44,21 +44,15 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
 
     @Getter
     private IChillerCasingType casingType = ChillerCasingBlock.ChillerCasingType.MESOL;
-
     @Persisted
     protected boolean hasSculk;
-
     @Nullable
     protected EnergyContainerList inputEnergyContainers;
-
-    protected SculkSourceBus sculkSource;
-
-    protected TickableSubscription passiveSubs;
-
     @Getter
     @Persisted
     private int sculkGrowthMeter;
-
+    protected SculkSourceBus sculkSource;
+    protected TickableSubscription passiveSubs;
     private final ScheduledExecutorService sculkDecayScheduler = Executors.newScheduledThreadPool(1);
 
     public HypogeanInfuserMachine(IMachineBlockEntity holder) {
@@ -181,7 +175,6 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
 
     private void doSculkDecay() {
         if(getOffsetTimer() % 100 != 0) return;
-        System.out.println(getOffsetTimer());
 
         if(this.sculkSource == null) {
             decreaseSculkGrowthMeter();
