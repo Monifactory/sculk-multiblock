@@ -64,6 +64,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     public HypogeanInfuserMachine(IMachineBlockEntity holder) {
         super(holder);
         this.hasSculk = false;
+        this.subscribeServerTick(this::doSculkDecay);
     }
 
     @Override
@@ -176,10 +177,12 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     public void onLoad() {
         super.onLoad();
         this.updatePassiveSubscription();
-        sculkDecayScheduler.scheduleAtFixedRate(this::doSculkDecay, 0, 5, TimeUnit.SECONDS);
     }
 
     private void doSculkDecay() {
+        if(getOffsetTimer() % 100 != 0) return;
+        System.out.println(getOffsetTimer());
+
         if(this.sculkSource == null) {
             decreaseSculkGrowthMeter();
             return;
