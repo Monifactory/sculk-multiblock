@@ -6,7 +6,6 @@ import com.monifactory.multiblocks.MoniMultiblocks;
 import com.monifactory.multiblocks.common.data.MMBlocks;
 import com.monifactory.multiblocks.common.data.MMMachines;
 import com.monifactory.multiblocks.common.data.MMRecipeTypes;
-import com.monifactory.multiblocks.common.recipe.SculkTemperatureCondition;
 import com.monifactory.multiblocks.integration.kjs.recipe.MMRecipeSchema;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.recipe.schema.RegisterRecipeSchemasEvent;
@@ -47,7 +46,6 @@ public class MMKubeJSPlugin extends KubeJSPlugin {
         event.add("MMBlocks", MMBlocks.class);
         event.add("MMMachines", MMMachines.class);
         event.add("MMRecipeTypes", MMRecipeTypes.class);
-        event.add("SculkTemperatureCondition", SculkTemperatureCondition.class);
         event.add("MoniMultiblocks", MoniMultiblocks.class);
     }
 }

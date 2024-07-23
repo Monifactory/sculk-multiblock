@@ -12,6 +12,8 @@ public interface IChillerCasingType {
     @NotNull
     String getName();
 
+    int getTier();
+
     /**
      * @return the minimum temperature this casing can withstand in K
      */

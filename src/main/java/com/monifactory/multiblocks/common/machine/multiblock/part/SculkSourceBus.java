@@ -36,8 +36,12 @@ public class SculkSourceBus extends MultiblockPartMachine {
         this.inputHandler.addChangedListener(runnable);
     }
 
-    public boolean getSculk() {
-        return inputHandler.extractItem(0, 1, false, false).getItem() == Items.SCULK_CATALYST;
+    public void extractSculk() {
+        inputHandler.extractItem(0, 1, false, false);
+    }
+
+    public boolean isValidSculk() {
+        return inputHandler.extractItem(0, 1, true).is(Items.SCULK_CATALYST);
     }
 
     @Override

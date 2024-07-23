@@ -8,6 +8,7 @@ import com.gregtechceu.gtceu.client.renderer.block.TextureOverrideRenderer;
 import com.lowdragmc.lowdraglib.Platform;
 import com.monifactory.multiblocks.MoniMultiblocks;
 import com.monifactory.multiblocks.api.block.IChillerCasingType;
+import lombok.Getter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +43,8 @@ public class ChillerCasingBlock extends ActiveBlock {
         private final int passiveAmount;
         private final int passiveRate;
         private final int usage;
+        @Getter
+        private final int tier;
         private final Material material;
         private final ResourceLocation texture;
 
@@ -51,6 +54,7 @@ public class ChillerCasingBlock extends ActiveBlock {
             this.minTemp = minTemp;
             this.passiveAmount = passiveAmount;
             this.passiveRate = passiveRate;
+            this.tier = tier;
             this.usage = GTValues.VA[tier];
             this.material = material;
             this.texture = texture;
