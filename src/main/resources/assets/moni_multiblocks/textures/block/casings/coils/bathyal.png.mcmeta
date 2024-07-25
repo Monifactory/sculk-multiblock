@@ -1,0 +1,9 @@
+{
+    "ldlib": {
+        "connection": "moni_multiblocks:block/casings/coils/bathyal_ctm"
+    },
+    "animation": {
+        "interpolate": true,
+        "frametime": 20
+    }
+}
