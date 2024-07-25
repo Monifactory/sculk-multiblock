@@ -3,9 +3,7 @@ package com.monifactory.multiblocks.common.machine.multiblock;
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.IEnergyContainer;
 import com.gregtechceu.gtceu.api.capability.recipe.EURecipeCapability;
-import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
-import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.feature.IFancyUIMachine;
@@ -15,7 +13,6 @@ import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMa
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableEnergyContainer;
 import com.gregtechceu.gtceu.api.misc.EnergyContainerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
-import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
@@ -26,13 +23,11 @@ import com.monifactory.multiblocks.common.machine.multiblock.part.SculkSourceBus
 import lombok.Getter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
@@ -52,6 +47,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     protected SculkSourceBus sculkSource;
     protected TickableSubscription passiveSubs;
     private TickableSubscription serverTickEvent;
+    @Getter
     @Persisted
     @DescSynced
     private final NotifiableEnergyContainer internalPowerBuffer;
@@ -75,11 +71,18 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         super.addDisplayText(textList);
 
         textList.add(Component.literal(LocalizationUtils.format(
-                        "Power Buffer: %d / %d", internalPowerBuffer.getEnergyStored(), internalPowerBuffer.getEnergyCapacity()))
+                        "Power Buffer: %s / %s", prettyFormatNumber(internalPowerBuffer.getEnergyStored()),
+                        prettyFormatNumber(internalPowerBuffer.getEnergyCapacity())))
                 .withStyle(ChatFormatting.WHITE));
 
-        if (!this.hasSculk) {
+        if (this.sculkSource == null) {
             textList.add(Component.translatable("moni_multiblocks.multiblock.hasNoSculk")
+                    .withStyle(ChatFormatting.RED));
+            return;
+        }
+
+        if (!this.hasSculk) {
+            textList.add(Component.literal("Sculk Input Bus is empty")
                     .withStyle(ChatFormatting.RED));
             return;
         }
@@ -97,61 +100,14 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         return realRecipe;
     }
 
-    protected void updatePassiveSubscription() {
-        if (!this.hasSculk) {
-            if (this.sculkSource != null && this.sculkSource.isValidSculk()) {
-                this.hasSculk = true;
-                this.passiveSubs = subscribeServerTick(passiveSubs, this::updatePassive);
-            } else {
-                unsubscribe(passiveSubs);
-                this.passiveSubs = null;
-            }
-        } else {
-            unsubscribe(passiveSubs);
-            this.passiveSubs = null;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    protected void updatePassive() {
-        if (this.isFormed()) {
-            if ((getOffsetTimer() % casingType.getPassiveConsumptionRate()) == 0) {
-                List<IRecipeHandler<?>> inputTanks = new ArrayList<>();
-                if (getCapabilitiesProxy().contains(IO.IN, FluidRecipeCapability.CAP)) {
-                    inputTanks.addAll(Objects.requireNonNull(
-                            getCapabilitiesProxy().get(IO.IN, FluidRecipeCapability.CAP)));
-                }
-                if (getCapabilitiesProxy().contains(IO.BOTH, FluidRecipeCapability.CAP)) {
-                    inputTanks.addAll(Objects.requireNonNull(
-                            getCapabilitiesProxy().get(IO.BOTH, FluidRecipeCapability.CAP)));
-                }
-                List<FluidIngredient> toDrain = List
-                        .of(FluidIngredient.of(casingType.getPassiveConsumptionAmount(), Fluids.WATER));
-                for (IRecipeHandler<?> tank : inputTanks) {
-                    toDrain = (List<FluidIngredient>) tank.handleRecipe(IO.IN, null, toDrain, null,
-                            false);
-                    if (toDrain == null)
-                        break;
-                }
-                // are we still looking for fluid to consume?
-                if (toDrain != null) {
-                    this.hasSculk = false;
-                    this.updatePassiveSubscription();
-                }
-            }
-        }
-    }
-
     @Override
     public void onStructureFormed() {
         super.onStructureFormed();
-        // capture all energy containers
         List<IEnergyContainer> energyContainers = new ArrayList<>();
         for (IMultiPart part : getParts()) {
             if (part instanceof SculkSourceBus sculkSource) {
-                // TODO make this be like the chiller casing with MatchContext or whatever
-                sculkSource.addListener(this::updatePassiveSubscription);
                 this.sculkSource = sculkSource;
+                continue;
             }
             for (var handler : part.getRecipeHandlers()) {
                 IO handlerIO = handler.getHandlerIO();
@@ -167,7 +123,6 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         if (obj instanceof IChillerCasingType casing) {
             this.casingType = casing;
         }
-        this.updatePassiveSubscription();
     }
 
     @Override
@@ -180,12 +135,6 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         serverTickEvent = null;
     }
 
-    @Override
-    public void onLoad() {
-        super.onLoad();
-        this.updatePassiveSubscription();
-    }
-
     private void serverTickEvent() {
         var offsetTimer = getOffsetTimer();
         if (offsetTimer % 100 == 0) doSculkDecay();
@@ -195,14 +144,11 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     private void doEnergyUpdate() {
         if (!this.isWorkingEnabled() || inputEnergyContainers == null) return;
 
-        var energyStored = inputEnergyContainers.getEnergyStored();
         long consumptionAmount = this.casingType.getPassiveConsumptionAmount() * this.casingType.getPassiveConsumptionRate();
+        long energyStored = inputEnergyContainers.getEnergyStored();
+        long energyAdded = internalPowerBuffer.addEnergy(energyStored);
 
-        if (internalPowerBuffer.getEnergyCanBeInserted() >= energyStored) {
-            this.inputEnergyContainers.removeEnergy(energyStored);
-        }
-
-        internalPowerBuffer.addEnergy(energyStored);
+        inputEnergyContainers.removeEnergy(energyAdded);
         internalPowerBuffer.removeEnergy(consumptionAmount);
     }
 
@@ -218,6 +164,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
             return;
         }
         this.sculkSource.extractSculk();
+        hasSculk = true;
         increaseSculkGrowthMeter();
     }
 
@@ -229,5 +176,17 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     private void increaseSculkGrowthMeter() {
         int increaseAmount = ThreadLocalRandom.current().nextInt(5, 16);
         sculkGrowthMeter = Math.min(100, sculkGrowthMeter + increaseAmount);
+    }
+
+    public static String prettyFormatNumber(long number) {
+        if (number < 1000) {
+            return Long.toString(number);
+        } else if (number < 1_000_000) {
+            return String.format("%.1fk", number / 1_000.0);
+        } else if (number < 1_000_000_000) {
+            return String.format("%.1fM", number / 1_000_000.0);
+        } else {
+            return String.format("%.1fB", number / 1_000_000_000.0);
+        }
     }
 }

@@ -37,7 +37,7 @@ public class InitialEnergyCondition extends RecipeCondition {
     @Override
     public boolean test(@NotNull GTRecipe recipe, @NotNull RecipeLogic recipeLogic) {
         return recipeLogic.machine.self() instanceof IHypogeanInfuserMachine machine
-                && machine.getEnergyContainer().getEnergyStored() >= this.requiredInitialEnergy;
+                && machine.getInternalPowerBuffer().getEnergyStored() >= this.requiredInitialEnergy;
     }
 
     @Override
