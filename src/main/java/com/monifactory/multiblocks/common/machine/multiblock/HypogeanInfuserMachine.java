@@ -50,13 +50,11 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     @Getter
     @Persisted
     @DescSynced
-    private final NotifiableEnergyContainer internalPowerBuffer;
+    private NotifiableEnergyContainer internalPowerBuffer;
 
     public HypogeanInfuserMachine(IMachineBlockEntity holder) {
         super(holder);
-        long tierVoltage = GTValues.V[casingType.getTier()];
-        this.internalPowerBuffer = NotifiableEnergyContainer.receiverContainer(this,
-                tierVoltage * 64L, tierVoltage, 1L);
+        setInternalPowerBuffer();
         this.hasSculk = false;
     }
 
@@ -69,10 +67,12 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     public void addDisplayText(@NotNull List<Component> textList) {
         super.addDisplayText(textList);
 
-        textList.add(Component.literal(LocalizationUtils.format(
-                        "Power Buffer: %s / %s", prettyFormatNumber(internalPowerBuffer.getEnergyStored()),
-                        prettyFormatNumber(internalPowerBuffer.getEnergyCapacity())))
-                .withStyle(ChatFormatting.WHITE));
+        if(internalPowerBuffer != null) {
+            textList.add(Component.literal(LocalizationUtils.format(
+                            "Power Buffer: %s / %s", prettyFormatNumber(internalPowerBuffer.getEnergyStored()),
+                            prettyFormatNumber(internalPowerBuffer.getEnergyCapacity())))
+                    .withStyle(ChatFormatting.WHITE));
+        }
 
         if (this.sculkSource == null) {
             textList.add(Component.translatable("moni_multiblocks.multiblock.hasNoSculk")
@@ -123,6 +123,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         if (obj instanceof IChillerCasingType casing) {
             this.casingType = casing;
         }
+        setInternalPowerBuffer();
         updateServerTickSubscription();
         checkAndPenalizeSculk();
     }
@@ -133,6 +134,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         this.hasSculk = false;
         this.unsubscribe(passiveSubs);
         this.unsubscribe(serverTickEvent);
+        internalPowerBuffer = null;
         passiveSubs = null;
         serverTickEvent = null;
         sculkSource = null;
@@ -157,7 +159,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     }
 
     private void doEnergyUpdate() {
-        if (!this.isWorkingEnabled() || inputEnergyContainers == null) return;
+        if (!this.isWorkingEnabled() || inputEnergyContainers == null || internalPowerBuffer == null) return;
 
         long consumptionAmount = this.casingType.getPassiveConsumptionAmount() * this.casingType.getPassiveConsumptionRate();
         long energyStored = inputEnergyContainers.getEnergyStored();
@@ -194,7 +196,13 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         sculkGrowthMeter = Math.min(100, sculkGrowthMeter + increaseAmount);
     }
 
-    public static String prettyFormatNumber(long number) {
+    private void setInternalPowerBuffer() {
+        long tierVoltage = GTValues.V[casingType.getTier()];
+        this.internalPowerBuffer = NotifiableEnergyContainer.receiverContainer(this,
+                tierVoltage * 256L, tierVoltage, 1L);
+    }
+
+    private static String prettyFormatNumber(long number) {
         if (number < 1000) {
             return Long.toString(number);
         } else if (number < 1_000_000) {
