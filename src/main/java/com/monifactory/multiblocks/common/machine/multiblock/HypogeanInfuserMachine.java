@@ -2,6 +2,7 @@ package com.monifactory.multiblocks.common.machine.multiblock;
 
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.IEnergyContainer;
+import com.gregtechceu.gtceu.api.capability.recipe.EURecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
@@ -20,7 +21,6 @@ import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.monifactory.multiblocks.api.block.IChillerCasingType;
 import com.monifactory.multiblocks.common.block.ChillerCasingBlock;
 import com.monifactory.multiblocks.common.machine.multiblock.part.SculkSourceBus;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import lombok.Getter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -30,12 +30,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 
 public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         implements IFancyUIMachine, IDisplayUIMachine, IHypogeanInfuserMachine {
@@ -58,7 +56,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     public HypogeanInfuserMachine(IMachineBlockEntity holder) {
         super(holder);
         this.hasSculk = false;
-        this.subscribeServerTick(this::doSculkDecay);
+        this.subscribeServerTick(this::serverTickEvent);
     }
 
     @Override
@@ -149,6 +147,14 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
                 sculkSource.addListener(this::updatePassiveSubscription);
                 this.sculkSource = sculkSource;
             }
+            for (var handler : part.getRecipeHandlers()) {
+                IO handlerIO = handler.getHandlerIO();
+                if (handlerIO == IO.IN){
+                    if (handler.getCapability() == EURecipeCapability.CAP && handler instanceof IEnergyContainer container) {
+                        energyContainers.add(container);
+                    }
+                }
+            }
         }
         this.inputEnergyContainers = new EnergyContainerList(energyContainers);
         Object obj = this.getMultiblockState().getMatchContext().get("ChillerCasing");
@@ -171,6 +177,18 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     public void onLoad() {
         super.onLoad();
         this.updatePassiveSubscription();
+    }
+
+    private void serverTickEvent() {
+        var offsetTimer = getOffsetTimer();
+        if(offsetTimer % 100 == 0) doSculkDecay();
+        doEnergyDecay();
+    }
+
+    private void doEnergyDecay() {
+        if(!this.isWorkingEnabled() || this.inputEnergyContainers == null) return;
+        long consumptionAmount = this.casingType.getPassiveConsumptionAmount() * this.casingType.getPassiveConsumptionRate();
+        this.inputEnergyContainers.removeEnergy(consumptionAmount);
     }
 
     private void doSculkDecay() {
