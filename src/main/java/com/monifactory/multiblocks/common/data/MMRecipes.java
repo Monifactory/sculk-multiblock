@@ -1,6 +1,8 @@
 package com.monifactory.multiblocks.common.data;
 
+import com.enderio.base.common.init.EIOFluids;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
+import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
 import com.monifactory.multiblocks.common.recipe.InitialEnergyCondition;
 import com.monifactory.multiblocks.common.recipe.SculkGrowthMeterCondition;
@@ -14,7 +16,7 @@ public class MMRecipes {
         MMRecipeTypes.INFUSER_RECIPES.recipeBuilder("mesol")
                 .inputItems(Items.SCULK_CATALYST, 1)
                 .inputItems(TagPrefix.ingot, GTMaterials.Neutronium, 8)
-                .inputFluids(GTMaterials.Water.getFluid(1000))
+                .inputFluids(FluidIngredient.of(1000, EIOFluids.XP_JUICE.get()))
                 .outputItems(MMBlocks.MESOL_CASING, 1)
                 .inputEU(2077152)
                 .addCondition(new InitialEnergyCondition(2077152)) // poc: the machine requires X amount of power to be stored in it, then instantly does the recipe
