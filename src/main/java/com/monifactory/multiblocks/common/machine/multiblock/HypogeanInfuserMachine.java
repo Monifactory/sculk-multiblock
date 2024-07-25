@@ -12,9 +12,11 @@ import com.gregtechceu.gtceu.api.machine.feature.IFancyUIMachine;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IDisplayUIMachine;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine;
+import com.gregtechceu.gtceu.api.machine.trait.NotifiableEnergyContainer;
 import com.gregtechceu.gtceu.api.misc.EnergyContainerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
+import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
@@ -31,8 +33,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
@@ -51,12 +51,18 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
     private int sculkGrowthMeter;
     protected SculkSourceBus sculkSource;
     protected TickableSubscription passiveSubs;
-    private final ScheduledExecutorService sculkDecayScheduler = Executors.newScheduledThreadPool(1);
+    private TickableSubscription serverTickEvent;
+    @Persisted
+    @DescSynced
+    private final NotifiableEnergyContainer internalPowerBuffer;
 
     public HypogeanInfuserMachine(IMachineBlockEntity holder) {
         super(holder);
+        long tierVoltage = GTValues.V[casingType.getTier()];
+        this.internalPowerBuffer = NotifiableEnergyContainer.receiverContainer(this,
+                tierVoltage * 64L, tierVoltage, 1L);
         this.hasSculk = false;
-        this.subscribeServerTick(this::serverTickEvent);
+        serverTickEvent = this.subscribeServerTick(this::serverTickEvent);
     }
 
     @Override
@@ -69,8 +75,8 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         super.addDisplayText(textList);
 
         textList.add(Component.literal(LocalizationUtils.format(
-                        "Sculk Tier: %s", GTValues.VN[casingType.getTier()]))
-                .withStyle(ChatFormatting.LIGHT_PURPLE));
+                        "Power Buffer: %d / %d", internalPowerBuffer.getEnergyStored(), internalPowerBuffer.getEnergyCapacity()))
+                .withStyle(ChatFormatting.WHITE));
 
         if (!this.hasSculk) {
             textList.add(Component.translatable("moni_multiblocks.multiblock.hasNoSculk")
@@ -79,7 +85,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         }
 
         textList.add(Component.literal(LocalizationUtils.format(
-                        "Sculk Growth Meter: %d%%", this.sculkGrowthMeter))
+                        "Sculk Growth Meter: %d%%", sculkGrowthMeter))
                 .withStyle(ChatFormatting.BLUE));
     }
 
@@ -149,7 +155,7 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
             }
             for (var handler : part.getRecipeHandlers()) {
                 IO handlerIO = handler.getHandlerIO();
-                if (handlerIO == IO.IN){
+                if (handlerIO == IO.IN) {
                     if (handler.getCapability() == EURecipeCapability.CAP && handler instanceof IEnergyContainer container) {
                         energyContainers.add(container);
                     }
@@ -169,8 +175,9 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         super.onStructureInvalid();
         this.hasSculk = false;
         this.unsubscribe(passiveSubs);
+        this.unsubscribe(serverTickEvent);
         passiveSubs = null;
-        sculkDecayScheduler.shutdownNow();
+        serverTickEvent = null;
     }
 
     @Override
@@ -181,24 +188,32 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
 
     private void serverTickEvent() {
         var offsetTimer = getOffsetTimer();
-        if(offsetTimer % 100 == 0) doSculkDecay();
-        doEnergyDecay();
+        if (offsetTimer % 100 == 0) doSculkDecay();
+        doEnergyUpdate();
     }
 
-    private void doEnergyDecay() {
-        if(!this.isWorkingEnabled() || this.inputEnergyContainers == null) return;
+    private void doEnergyUpdate() {
+        if (!this.isWorkingEnabled() || inputEnergyContainers == null) return;
+
+        var energyStored = inputEnergyContainers.getEnergyStored();
         long consumptionAmount = this.casingType.getPassiveConsumptionAmount() * this.casingType.getPassiveConsumptionRate();
-        this.inputEnergyContainers.removeEnergy(consumptionAmount);
+
+        if (internalPowerBuffer.getEnergyCanBeInserted() >= energyStored) {
+            this.inputEnergyContainers.removeEnergy(energyStored);
+        }
+
+        internalPowerBuffer.addEnergy(energyStored);
+        internalPowerBuffer.removeEnergy(consumptionAmount);
     }
 
     private void doSculkDecay() {
-        if(getOffsetTimer() % 100 != 0) return;
+        if (getOffsetTimer() % 100 != 0) return;
 
-        if(this.sculkSource == null) {
+        if (this.sculkSource == null) {
             decreaseSculkGrowthMeter();
             return;
         }
-        if(!this.sculkSource.isValidSculk()) {
+        if (!this.sculkSource.isValidSculk()) {
             decreaseSculkGrowthMeter();
             return;
         }
