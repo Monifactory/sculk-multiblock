@@ -58,7 +58,6 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         this.internalPowerBuffer = NotifiableEnergyContainer.receiverContainer(this,
                 tierVoltage * 64L, tierVoltage, 1L);
         this.hasSculk = false;
-        serverTickEvent = this.subscribeServerTick(this::serverTickEvent);
     }
 
     @Override
@@ -105,8 +104,9 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         super.onStructureFormed();
         List<IEnergyContainer> energyContainers = new ArrayList<>();
         for (IMultiPart part : getParts()) {
-            if (part instanceof SculkSourceBus sculkSource) {
-                this.sculkSource = sculkSource;
+            if (part instanceof SculkSourceBus sculkSourceBus) {
+                sculkSourceBus.addListener(this::updateServerTickSubscription);
+                this.sculkSource = sculkSourceBus;
                 continue;
             }
             for (var handler : part.getRecipeHandlers()) {
@@ -123,6 +123,8 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         if (obj instanceof IChillerCasingType casing) {
             this.casingType = casing;
         }
+        updateServerTickSubscription();
+        checkAndPenalizeSculk();
     }
 
     @Override
@@ -133,6 +135,19 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
         this.unsubscribe(serverTickEvent);
         passiveSubs = null;
         serverTickEvent = null;
+        sculkSource = null;
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if(!isRemote() && isFormed()) {
+            updateServerTickSubscription();
+        }
+    }
+
+    private void updateServerTickSubscription() {
+        serverTickEvent = this.subscribeServerTick(serverTickEvent, this::serverTickEvent);
     }
 
     private void serverTickEvent() {
@@ -154,18 +169,19 @@ public class HypogeanInfuserMachine extends WorkableElectricMultiblockMachine
 
     private void doSculkDecay() {
         if (getOffsetTimer() % 100 != 0) return;
+        if(!checkAndPenalizeSculk()) return;
 
-        if (this.sculkSource == null) {
-            decreaseSculkGrowthMeter();
-            return;
-        }
-        if (!this.sculkSource.isValidSculk()) {
-            decreaseSculkGrowthMeter();
-            return;
-        }
         this.sculkSource.extractSculk();
-        hasSculk = true;
         increaseSculkGrowthMeter();
+    }
+
+    private boolean checkAndPenalizeSculk() {
+        if (this.sculkSource == null || !this.sculkSource.isValidSculk()) {
+            decreaseSculkGrowthMeter();
+            return false;
+        }
+        hasSculk = true;
+        return true;
     }
 
     private void decreaseSculkGrowthMeter() {
