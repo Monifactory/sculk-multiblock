@@ -1,0 +1,8 @@
+{
+  "values": [
+    "moni_multiblocks:mesol_voltic_casing",
+    "moni_multiblocks:bathyal_voltic_casing",
+    "moni_multiblocks:abyssal_voltic_casing",
+    "moni_multiblocks:hadal_voltic_casing"
+  ]
+}

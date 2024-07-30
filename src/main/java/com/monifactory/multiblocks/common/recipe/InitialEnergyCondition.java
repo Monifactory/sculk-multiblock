@@ -31,7 +31,7 @@ public class InitialEnergyCondition extends RecipeCondition {
 
     @Override
     public Component getTooltips() {
-        return Component.literal(LocalizationUtils.format("Required Initial Energy: %d", requiredInitialEnergy));
+        return Component.literal(LocalizationUtils.format("Required Energy: %d", requiredInitialEnergy));
     }
 
     @Override

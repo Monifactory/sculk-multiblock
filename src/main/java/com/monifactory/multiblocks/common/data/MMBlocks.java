@@ -1,6 +1,7 @@
 package com.monifactory.multiblocks.common.data;
 
 import com.gregtechceu.gtceu.api.item.RendererBlockItem;
+import com.gregtechceu.gtceu.api.item.tool.GTToolType;
 import com.monifactory.multiblocks.common.CommonProxy;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
@@ -38,12 +39,12 @@ public class MMBlocks {
         IChillerCasingType coilType) {
         System.out.println("Creating Chiller Casing");
         BlockEntry<ChillerCasingBlock> coilBlock = CommonProxy.REGISTRATE
-            .block("%s_coil_block".formatted(coilType.getName()),
+            .block("%s_voltic_casing".formatted(coilType.getName()),
                 p -> new ChillerCasingBlock(p, coilType))
             .initialProperties(() -> Blocks.IRON_BLOCK)
             .properties(p -> p.isValidSpawn((state, level, pos, ent) -> false))
             .blockstate(NonNullBiConsumer.noop())
-            .tag(/* GTToolType.WRENCH.harvestTags.get(0), */BlockTags.MINEABLE_WITH_PICKAXE)
+                .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .item(RendererBlockItem::new).model(NonNullBiConsumer.noop())
             .build()
             .register();

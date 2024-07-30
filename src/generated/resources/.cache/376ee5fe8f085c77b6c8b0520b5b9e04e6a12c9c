@@ -1,0 +1,8 @@
+// 1.20.1	2024-07-30T12:22:52.3748257	Registrate Provider for moni_multiblocks [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+f2697ede42d5b230c2f609c0754cf278cac7c343 assets/moni_multiblocks/lang/en_ud.json
+024af51e0bcc4b12f344e4d793a58b0ed1e05998 assets/moni_multiblocks/lang/en_us.json
+f1187db2e59774beedc0a0344a009c57b94d1869 data/minecraft/tags/blocks/mineable/pickaxe.json
+9499d905f0f9a9a532d1b2cac4711c1adf0738be data/moni_multiblocks/loot_tables/blocks/abyssal_voltic_casing.json
+37c4d485716717c78058bf42bb477eb09ab82b73 data/moni_multiblocks/loot_tables/blocks/bathyal_voltic_casing.json
+82702dff94f82c353095a06da86baf3e23617252 data/moni_multiblocks/loot_tables/blocks/hadal_voltic_casing.json
+e2a7d8b67f96555c9f13eeea6fa5e1236b53c8ae data/moni_multiblocks/loot_tables/blocks/mesol_voltic_casing.json

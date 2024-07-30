@@ -18,7 +18,7 @@ license = "${mod_license}"
     # credits="" #optional
     # Some more fluff displayed in the Mods panel. Plug your stuff here!
     authors="${mod_author}"
-    description = '''Draconic Fusion Crafting if it was good'''
+    description = '''Misc Monifactory Multiblocks'''
 
     [[dependencies.${mod_id}]]
         modId = "forge"

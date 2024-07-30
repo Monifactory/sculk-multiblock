@@ -29,7 +29,7 @@ public class SculkGrowthMeterCondition extends RecipeCondition {
 
     @Override
     public Component getTooltips() {
-        return Component.literal("Required Growth Meter: %d".formatted(minGrowthMeter));
+        return Component.literal("Growth Meter: %d".formatted(minGrowthMeter));
     }
 
     @Override

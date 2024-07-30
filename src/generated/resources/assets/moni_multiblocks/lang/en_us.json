@@ -1,0 +1,11 @@
+{
+  "block.moni_multiblocks.abyssal_voltic_casing": "Abyssal Voltic Casing",
+  "block.moni_multiblocks.bathyal_voltic_casing": "Bathyal Voltic Casing",
+  "block.moni_multiblocks.hadal_voltic_casing": "Hadal Voltic Casing",
+  "block.moni_multiblocks.hypogean_infuser": "Hypogean Infuser",
+  "block.moni_multiblocks.mesol_voltic_casing": "Mesol Voltic Casing",
+  "block.moni_multiblocks.sculk_seed_bus": "Sculk Seed Bus",
+  "moni_multiblocks.hypogean_infuser": "Hypogean Infuser",
+  "moni_multiblocks.multiblock.hasSculk": "Sculk Growth Nominal",
+  "moni_multiblocks.multiblock.hasNoSculk": "No Sculk Growth Detected"
+}

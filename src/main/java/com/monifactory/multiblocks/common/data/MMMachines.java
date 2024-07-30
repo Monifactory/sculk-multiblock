@@ -40,7 +40,8 @@ public class MMMachines {
             .aisle("CCCCC", " HHH ", " HHH ", " HHH ", "CCCCC")
             .aisle("CCCCC", " HAH ", " HAH ", " HAH ", "CCCCC")
             .aisle("CCCCC", " HHH ", " HHH ", " HHH ", "CCCCC")
-            .aisle("CCYCC", "     ", "     ", "     ", "CCCCC").where('H', coolingCoils())
+            .aisle("CCYCC", "     ", "     ", "     ", "CCCCC")
+                .where('H', coolingCoils())
             .where(' ', Predicates.any())
             .where('Y', Predicates.controller(Predicates.blocks(definition.getBlock())))
             .where('C',
